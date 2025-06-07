@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>软件管理平台</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="api.js"></script>
+    <script src="common.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="logo">软件管理平台</div>
+            <div class="icons">
+                <i class="bi bi-box-arrow-right" id="logout"></i>
+            </div>
+        </header>
+        
+        <!-- 主体内容 -->
+        <div class="main-content">
+            <!-- 侧边栏 -->
+            <div class="sidebar">
+                <ul class="menu">
+                    <li class="menu-item active" data-page="index.html"><i class="bi bi-house"></i> 首页</li>
+                    <li class="menu-item" data-page="requirement.html"><i class="bi bi-box"></i> 需求描述</li>
+                    <li class="menu-item" data-page="architecture.html"><i class="bi bi-people"></i> 架构代码</li>
+                    <li class="menu-item" data-page="database.html"><i class="bi bi-cart"></i> 数据库设计</li>
+                    <li class="menu-item" data-page="module.html"><i class="bi bi-clipboard-data"></i> 模块代码</li>
+                    <li class="menu-item" data-page="testcase.html"><i class="bi bi-gear"></i> 测试用例</li>
+                    <li class="menu-item" data-page="deployment.html"><i class="bi bi-cloud-upload"></i> 功能部署</li>
+                </ul>
+            </div>
+            
+            <!-- 主要内容区域 -->
+            <div class="content">
+                <div class="breadcrumb">首页</div>
+                <div class="card">
+                    <div class="card-header">历史项目</div>
+                    <div class="card-body">
+                        <table class="table" id="projectsTable">
+                            <thead>
+                                <tr>
+                                    <th>项目编号</th>
+                                    <th>项目名称</th>
+                                    <th>项目描述</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projectsTableBody">
+                                <!-- 项目数据将通过API动态加载 -->
+                                <tr class="loading-row">
+                                    <td colspan="4" class="text-center">正在加载项目数据...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-add" id="createNewProject">新建项目</button>
+                    </div>
+                </div>
+                <div class="footer">
+                    <p>© 2025 软件管理平台 | Powered by 软件管理系统 | 版权所有</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 通过API加载项目列表
+        loadProjects();
+        
+        // 绑定创建新项目按钮事件
+        document.getElementById('createNewProject').addEventListener('click', function() {
+            window.location.href = 'project_new.html';
+        });
+    });
+
+    // 加载项目列表函数
+    async function loadProjects() {
+        try {
+            const projectsTableBody = document.getElementById('projectsTableBody');
+            
+            // 显示加载中状态
+            projectsTableBody.innerHTML = '<tr class="loading-row"><td colspan="4" class="text-center">正在加载项目数据...</td></tr>';
+            
+            // 调用后端API获取项目列表
+            const response = await API.Project.listProjects();
+            
+            // 清空表格内容
+            projectsTableBody.innerHTML = '';
+            
+            if (response.success && response.projects && response.projects.length > 0) {
+                // 填充表格数据
+                response.projects.forEach(project => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${project.id}</td>
+                        <td>${project.name}</td>
+                        <td>${project.description || '无项目描述'}</td>
+                        <td>
+                            <button class="btn btn-edit" data-id="${project.id}">编辑</button>
+                            <button class="btn btn-delete" data-id="${project.id}">删除</button>
+                        </td>
+                    `;
+                    projectsTableBody.appendChild(row);
+                });
+                
+                // 绑定编辑和删除按钮事件
+                bindTableButtonEvents();
+            } else {
+                // 显示无数据提示
+                projectsTableBody.innerHTML = '<tr><td colspan="4" class="text-center">暂无项目，请点击"新建项目"按钮创建您的第一个项目。</td></tr>';
+            }
+        } catch (error) {
+            console.error('加载项目列表失败:', error);
+            const projectsTableBody = document.getElementById('projectsTableBody');
+            projectsTableBody.innerHTML = '<tr><td colspan="4" class="text-center error-message">加载项目列表失败，请刷新页面重试。</td></tr>';
+        }
+    }
+
+    // 绑定表格中按钮的事件
+    function bindTableButtonEvents() {
+        // 绑定编辑按钮事件
+        const editButtons = document.querySelectorAll('.btn-edit');
+        editButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const projectId = this.getAttribute('data-id');
+                // 跳转到编辑页面，将项目ID作为URL参数传递
+                window.location.href = `project_edit.html?id=${projectId}`;
+            });
+        });
+        
+        // 绑定删除按钮事件
+        const deleteButtons = document.querySelectorAll('.btn-delete');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', async function() {
+                const projectId = this.getAttribute('data-id');
+                const projectName = this.closest('tr').cells[1].textContent;
+                
+                if (confirm(`确定要删除项目"${projectName}"吗？此操作不可恢复。`)) {
+                    try {
+                        // 显示删除中状态
+                        const row = this.closest('tr');
+                        const actionCell = row.cells[3];
+                        const originalContent = actionCell.innerHTML;
+                        actionCell.innerHTML = '<span class="deleting">删除中...</span>';
+                        
+                        console.log(`开始删除项目: ID=${projectId}, 名称=${projectName}`);
+                        
+                        // 使用API模块而不是直接fetch
+                        const response = await API.Project.deleteProject(projectId);
+                        
+                        if (response.success) {
+                            console.log('删除成功，移除表格行');
+                            alert('项目删除成功！');
+                            row.remove();
+                        } else {
+                            console.error('删除失败:', response.message);
+                            actionCell.innerHTML = originalContent;
+                            alert('删除失败：' + response.message);
+                            bindTableButtonEvents();
+                        }
+                    } catch (error) {
+                        console.error('删除项目时发生错误:', error);
+                        alert(`删除项目失败，错误信息: ${error.message}`);
+                        loadProjects(); // 重新加载整个列表
+                    }
+                }
+            });
+        });
+    }
+    </script>
+</body>
+</html> 

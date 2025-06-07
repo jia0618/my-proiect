@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>软件管理平台 - 功能部署</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="api.js"></script>
+    <script src="common.js"></script>
+    <style>
+        /* 部署步骤文档样式 */
+        #deployStepsContent {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+        #deployStepsContent h1, 
+        #deployStepsContent h2, 
+        #deployStepsContent h3, 
+        #deployStepsContent h4, 
+        #deployStepsContent h5, 
+        #deployStepsContent h6 {
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            color: #333;
+        }
+        #deployStepsContent h1 { font-size: 1.8em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        #deployStepsContent h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+        #deployStepsContent h3 { font-size: 1.3em; }
+        #deployStepsContent h4 { font-size: 1.1em; }
+        
+        #deployStepsContent code {
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            color: #c7254e;
+        }
+        
+        #deployStepsContent .code-block {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 1em;
+            margin: 1em 0;
+            overflow-x: auto;
+        }
+        
+        #deployStepsContent .code-block pre {
+            margin: 0;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            color: #333;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        /* 配置文件特殊样式 */
+        #deployStepsContent .code-block.config pre {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #0066cc;
+            background-color: #f8f8f8;
+            padding: 8px;
+            border-left: 3px solid #0066cc;
+        }
+        
+        /* 缩进代码块样式 */
+        #deployStepsContent .indented-code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f5f5f5;
+            padding: 8px;
+            margin: 8px 0;
+            border-left: 3px solid #ddd;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        #deployStepsContent ul, #deployStepsContent ol {
+            padding-left: 2em;
+            margin: 1em 0;
+        }
+        
+        #deployStepsContent li {
+            margin: 0.5em 0;
+        }
+        
+        #deployStepsContent a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+        
+        #deployStepsContent a:hover {
+            text-decoration: underline;
+        }
+        
+        #deployStepsContent strong {
+            font-weight: 600;
+        }
+        
+        #deployStepsContent em {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="logo">软件管理平台</div>
+            <div class="icons">
+                <i class="bi bi-box-arrow-right" id="logout"></i>
+            </div>
+        </header>
+        
+        <!-- 主体内容 -->
+        <div class="main-content">
+            <!-- 侧边栏 -->
+            <div class="sidebar">
+                <ul class="menu">
+                    <li class="menu-item" data-page="index.html"><i class="bi bi-house"></i> 首页</li>
+                    <li class="menu-item" data-page="requirement.html"><i class="bi bi-box"></i> 需求描述</li>
+                    <li class="menu-item" data-page="architecture.html"><i class="bi bi-people"></i> 架构代码</li>
+                    <li class="menu-item" data-page="database.html"><i class="bi bi-cart"></i> 数据库设计</li>
+                    <li class="menu-item" data-page="module.html"><i class="bi bi-clipboard-data"></i> 模块代码</li>
+                    <li class="menu-item" data-page="testcase.html"><i class="bi bi-gear"></i> 测试用例</li>
+                    <li class="menu-item active" data-page="deployment.html"><i class="bi bi-cloud-upload"></i> 功能部署</li>
+                </ul>
+            </div>
+            
+            <!-- 主要内容区域 -->
+            <div class="content">
+                <div class="breadcrumb">功能部署</div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <span>部署管理</span>
+                            <!-- 部署环境选择 -->
+                            <div class="form-group">
+                                <label for="environmentSelect">部署环境:</label>
+                                <select class="form-control" id="environmentSelect">
+                                    <!-- 选项将通过API动态加载 -->
+                                    <option value="" disabled selected>加载中...</option>
+                                </select>
+                            </div>
+                            <div class="project-select-container">
+                                <span class="select-label">选择项目:</span>
+                                <select class="project-select" id="projectSelect">
+                                    <option value="" disabled selected>请选择项目</option>
+                                    <!-- 项目选项将通过API动态加载 -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="header-right">
+                            
+                        </div>
+                    </div>
+                    <div class="deployment-actions">
+                        <div class="deployment-btn-container">
+                            <button class="btn btn-primary btn-deploy" id="deployBtn">
+                                <i class="bi bi-cloud-upload"></i> 部署
+                            </button>
+                        </div>
+                        <div class="deployment-btn-container">
+                            <button class="btn btn-primary btn-test" id="testBtn">
+                                <i class="bi bi-check-circle"></i> 测试
+                            </button>
+                        </div>
+                        <div class="deployment-status" id="deploymentStatus" style="margin-top: 10px; display: none;">
+                            <div class="status-container">
+                                <span class="status-label">部署状态:</span>
+                                <span class="status-value" id="statusValue">准备中</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                                </div>
+                                <div class="progress-percentage" id="progressPercentage">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h3>失败的测试用例</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>用例编号</th>
+                                    <th>失败用例</th>
+                                    <th>测试结果</th>
+                                    <th>错误信息</th>
+                                </tr>
+                            </thead>
+                            <tbody id="failedTestsTableBody">
+                                <!-- 失败测试用例将通过API动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 新增部署步骤文档区域 -->
+                    <div class="card-body" id="deployStepsContainer" style="display: none;">
+                        <h3>部署步骤文档</h3>
+                        <div class="deployment-steps-content">
+                            <pre id="deployStepsContent" style="white-space: pre-wrap; background-color: #f5f5f5; padding: 15px; border-radius: 5px; max-height: 500px; overflow-y: auto;"></pre>
+                        </div>
+                        <div class="deployment-steps-actions" style="margin-top: 10px;">
+                            <button class="btn btn-primary" id="copyDeployStepsBtn">
+                                <i class="bi bi-clipboard"></i> 复制文档
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        
+                    </div>
+                </div>
+                <div class="footer">
+                    <p>© 2025 软件管理平台 | Powered by 软件管理系统 | 版权所有</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取页面元素
+        const projectSelect = document.getElementById('projectSelect');
+        const environmentSelect = document.getElementById('environmentSelect');
+        const deployBtn = document.getElementById('deployBtn');
+        const testBtn = document.getElementById('testBtn');
+        const deploymentStatus = document.getElementById('deploymentStatus');
+        const statusValue = document.getElementById('statusValue');
+        const progressFill = document.getElementById('progressFill');
+        const progressPercentage = document.getElementById('progressPercentage');
+        const failedTestsTableBody = document.getElementById('failedTestsTableBody');
+        
+        // 当前选中的项目ID
+        let currentProjectId = null;
+        
+        // 加载项目列表
+        loadProjects();
+        
+        // 从URL获取项目ID参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectIdFromUrl = urlParams.get('project_id');
+        if (projectIdFromUrl) {
+            // 如果URL中有项目ID，则自动选中该项目
+            localStorage.setItem('currentProjectId', projectIdFromUrl);
+        }
+        
+        // 项目选择变更事件
+        projectSelect.addEventListener('change', function() {
+            const selectedProjectId = this.value;
+            if (selectedProjectId) {
+                // 保存选择的项目ID
+                localStorage.setItem('currentProjectId', selectedProjectId);
+                currentProjectId = selectedProjectId;
+                
+                // 加载项目的部署信息，使用强制刷新
+                loadDeploymentInfo(selectedProjectId, true);
+                
+                console.log('选择了项目ID:', selectedProjectId);
+            } else {
+                // 重置部署状态显示
+                deploymentStatus.style.display = 'none';
+                // 清空失败测试表格
+                failedTestsTableBody.innerHTML = '';
+                
+                currentProjectId = null;
+            }
+        });
+        
+        // 部署按钮点击事件
+        deployBtn.addEventListener('click', function() {
+            if (!currentProjectId) {
+                alert('请先选择项目');
+                return;
+            }
+            
+            const environment = environmentSelect.value;
+            
+            // 询问确认
+            if (!confirm(`确定要部署项目到${getEnvironmentName(environment)}吗？`)) {
+                return;
+            }
+            
+            // 显示部署状态
+            deploymentStatus.style.display = 'block';
+            statusValue.textContent = '部署中...';
+            updateProgress(10);
+            
+            // 调用API生成部署步骤
+            API.Deployment.generateDeployment(currentProjectId, environment)
+                .then(response => {
+                    if (response.success) {
+                        updateProgress(30);
+                        
+                        // 如果直接返回了部署步骤，立即显示
+                        if (response.deployment && response.deployment.deploy_steps) {
+                            const deployStepsContainer = document.getElementById('deployStepsContainer');
+                            const deployStepsContent = document.getElementById('deployStepsContent');
+                            
+                            deployStepsContainer.style.display = 'block';
+                            // 使用renderMarkdown函数渲染格式
+                            deployStepsContent.innerHTML = renderMarkdown(response.deployment.deploy_steps);
+                        }
+                        
+                        statusValue.textContent = '执行部署...';
+                        updateProgress(50);
+                        
+                        // 执行部署
+                        return API.Deployment.executeDeployment(currentProjectId);
+                    } else {
+                        throw new Error(response.message || '生成部署步骤失败');
+                    }
+                })
+                .then(response => {
+                    if (response.success) {
+                        updateProgress(100);
+                        statusValue.textContent = '部署成功';
+                        alert('部署成功');
+                        
+                        // 重新加载部署信息，使用强制刷新
+                        loadDeploymentInfo(currentProjectId, true);
+                    } else {
+                        throw new Error(response.message || '执行部署失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('部署失败:', error);
+                    updateProgress(0);
+                    statusValue.textContent = '部署失败';
+                    alert('部署失败: ' + error.message);
+                });
+        });
+        
+        // 测试按钮点击事件
+        testBtn.addEventListener('click', function() {
+            if (!currentProjectId) {
+                alert('请先选择项目');
+                return;
+            }
+            
+            if (!confirm('确定要执行部署测试吗？')) {
+                return;
+            }
+            
+            // 显示测试中状态
+            deploymentStatus.style.display = 'block';
+            statusValue.textContent = '测试中...';
+            updateProgress(10);
+            
+            // 清空当前的失败测试用例列表
+            clearFailedTests();
+            
+            // 显示测试进行中的提示
+            const loadingRow = document.createElement('tr');
+            const loadingCell = document.createElement('td');
+            loadingCell.colSpan = 4;
+            loadingCell.textContent = '测试执行中，请稍候...';
+            loadingRow.appendChild(loadingCell);
+            failedTestsTableBody.appendChild(loadingRow);
+            
+            // 实际测试场景应调用后端API执行测试
+            updateProgress(30);
+            
+            // 模拟API调用 - 在实际环境中替换为真实API调用
+            fetch(`/deployment/api/${currentProjectId}/execute`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 更新进度
+                updateProgress(70);
+                
+                // 如果部署执行成功，获取最新的测试数据
+                if (data.success) {
+                    // 延迟一点展示结果，以便后端能完成数据处理
+                    setTimeout(() => {
+                        // 调用测试API获取当前测试结果数据
+                        fetch(`/test/api/${currentProjectId}?t=${new Date().getTime()}`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Cache-Control': 'no-cache, no-store, must-revalidate'
+                            }
+                        })
+                        .then(res => res.json())
+                        .then(testData => {
+                            updateProgress(100);
+                            
+                            // 添加调试信息，记录原始测试数据
+                            console.log('测试API返回原始数据:', testData);
+                            
+                            // 检查test_cases的存在形式
+                            let testCases = [];
+                            if (testData.success) {
+                                if (testData.test_cases && Array.isArray(testData.test_cases)) {
+                                    testCases = testData.test_cases;
+                                    console.log('找到测试用例数组，长度:', testCases.length);
+                                } else if (testData.tests && Array.isArray(testData.tests)) {
+                                    testCases = testData.tests;
+                                    console.log('找到替代测试用例数组(tests)，长度:', testCases.length);
+                                } else if (testData.data && testData.data.test_cases && Array.isArray(testData.data.test_cases)) {
+                                    testCases = testData.data.test_cases;
+                                    console.log('找到嵌套测试用例数组(data.test_cases)，长度:', testCases.length);
+                                } else {
+                                    console.warn('未找到有效的测试用例数组，API结构:', Object.keys(testData));
+                                }
+                            }
+                            
+                            if (testCases.length > 0) {
+                                // 计算测试结果
+                                const totalTests = testCases.length;
+                                const failedTests = testCases.filter(test => {
+                                    const result = (test.test_result || '').toLowerCase();
+                                    return result.includes('fail') || result === '失败' || 
+                                           result.includes('错误') || result.includes('error');
+                                }).length;
+                                
+                                statusValue.textContent = '测试成功';
+                                alert(`测试执行完成：共${totalTests}个测试，${failedTests}个失败`);
+                                
+                                // 手动存储测试状态到localStorage，确保页面刷新后状态保持一致
+                                localStorage.setItem(`deployment_status_${currentProjectId}`, 'success');
+                            } else {
+                                // 如果无法获取测试结果，使用部署API的响应
+                                const totalTests = data.total_tests || 0;
+                                const failedTests = data.failed_tests || 0;
+                                
+                                statusValue.textContent = '测试成功';
+                                alert(`测试执行完成：共${totalTests}个测试，${failedTests}个失败`);
+                                
+                                // 手动存储测试状态到localStorage，确保页面刷新后状态保持一致
+                                localStorage.setItem(`deployment_status_${currentProjectId}`, 'success');
+                            }
+                            
+                            // 加载最新的测试失败用例
+                            loadFailedTests(currentProjectId, true);
+                        })
+                        .catch(error => {
+                            console.error('获取测试结果失败:', error);
+                            
+                            // 如果获取失败，使用部署API的响应
+                            const totalTests = data.total_tests || 0;
+                            const failedTests = data.failed_tests || 0;
+                            
+                            updateProgress(100);
+                            statusValue.textContent = '测试完成';
+                            alert(`测试执行完成：共${totalTests}个测试，${failedTests}个失败`);
+                            
+                            // 尝试加载测试用例
+                            loadFailedTests(currentProjectId, true);
+                        });
+                    }, 1000);
+                } else {
+                    updateProgress(100);
+                    statusValue.textContent = '测试出错';
+                    alert(`测试执行出错: ${data.message || '未知错误'}`);
+                    
+                    // 尝试加载最新的测试失败用例
+                    loadFailedTests(currentProjectId, true);
+                }
+            })
+            .catch(error => {
+                console.error('测试执行失败:', error);
+                updateProgress(0);
+                statusValue.textContent = '测试失败';
+                alert('测试执行失败: ' + error.message);
+                
+                // 尝试加载可能存在的失败测试用例
+                setTimeout(() => {
+                    loadFailedTests(currentProjectId, true);
+                }, 500);
+            });
+        });
+        
+        // 加载用户项目列表
+        async function loadProjects() {
+            try {
+                // 使用无缓存调用获取项目列表
+                const response = await fetch('/project/api/list?t=' + new Date().getTime(), {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate'
+                    }
+                }).then(res => res.json());
+                
+                // 清空现有选项，只保留默认选项
+                while (projectSelect.options.length > 1) {
+                    projectSelect.remove(1);
+                }
+                
+                if (response.success && response.projects && response.projects.length > 0) {
+                    // 添加项目选项
+                    response.projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.id;
+                        option.textContent = project.name;
+                        projectSelect.appendChild(option);
+                    });
+                    
+                    // 检查是否有来自URL或本地存储的项目ID
+                    const savedProjectId = projectIdFromUrl || localStorage.getItem('currentProjectId');
+                    if (savedProjectId) {
+                        // 设置选择的项目
+                        projectSelect.value = savedProjectId;
+                        
+                        // 如果选择有效，则加载项目部署信息
+                        if (projectSelect.value) {
+                            currentProjectId = savedProjectId;
+                            loadDeploymentInfo(savedProjectId, true);
+                        }
+                    }
+                } else {
+                    console.log('暂无项目');
+                }
+            } catch (error) {
+                console.error('加载项目列表失败:', error);
+                alert('加载项目列表失败，请刷新页面重试');
+            }
+        }
+        
+        // 加载项目部署信息
+        async function loadDeploymentInfo(projectId, forceRefresh = false) {
+            try {
+                // 使用fetch直接调用API，强制跳过任何缓存
+                const response = await fetch(`/deployment/api/${projectId}?t=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                }).then(res => res.json());
+                
+                if (response.success && response.deployment) {
+                    // 显示部署状态
+                    const deployment = response.deployment;
+                    
+                    // 检查localStorage中是否有存储的部署状态，优先使用它
+                    const localStatus = localStorage.getItem(`deployment_status_${projectId}`);
+                    
+                    if (deployment.status || localStatus) {
+                        deploymentStatus.style.display = 'block';
+                        
+                        // 优先使用本地存储的状态，如果存在
+                        if (localStatus) {
+                            statusValue.textContent = getDeploymentStatusText(localStatus);
+                            // 根据状态设置进度条
+                            updateProgress(localStatus === 'success' ? 100 : 0);
+                        } else {
+                            statusValue.textContent = getDeploymentStatusText(deployment.status);
+                            
+                            // 如果有进度信息，设置进度条
+                            if (deployment.progress !== undefined) {
+                                updateProgress(deployment.progress);
+                            } else {
+                                // 默认完成状态
+                                updateProgress(deployment.status === 'success' ? 100 : 0);
+                            }
+                        }
+                        
+                        // 如果有环境设置，更新选择
+                        if (deployment.environment) {
+                            environmentSelect.value = deployment.environment;
+                        }
+                        
+                        // 显示部署步骤文档（如果有）
+                        const deployStepsContainer = document.getElementById('deployStepsContainer');
+                        const deployStepsContent = document.getElementById('deployStepsContent');
+                        
+                        if (deployment.deploy_steps) {
+                            deployStepsContainer.style.display = 'block';
+                            // 使用renderMarkdown函数渲染格式
+                            deployStepsContent.innerHTML = renderMarkdown(deployment.deploy_steps);
+                            
+                            // 初始化复制按钮功能
+                            const copyBtn = document.getElementById('copyDeployStepsBtn');
+                            copyBtn.addEventListener('click', function() {
+                                navigator.clipboard.writeText(deployment.deploy_steps)
+                                    .then(() => {
+                                        alert('部署步骤文档已复制到剪贴板');
+                                    })
+                                    .catch(err => {
+                                        console.error('复制失败:', err);
+                                        alert('复制失败，请手动选择文本并复制');
+                                    });
+                            });
+                        } else {
+                            deployStepsContainer.style.display = 'none';
+                        }
+                        
+                        // 加载失败测试用例，始终强制刷新
+                        if (deployment.failed_tests) {
+                            displayFailedTests(deployment.failed_tests);
+                        } else {
+                            loadFailedTests(projectId, true);
+                        }
+                    } else {
+                        // 无部署状态，隐藏状态面板
+                        deploymentStatus.style.display = 'none';
+                        
+                        // 隐藏部署步骤文档
+                        document.getElementById('deployStepsContainer').style.display = 'none';
+                        
+                        // 清空失败测试表格
+                        clearFailedTests();
+                        
+                        console.log('暂无部署状态信息');
+                    }
+                } else {
+                    // 无部署信息，隐藏状态面板
+                    deploymentStatus.style.display = 'none';
+                    
+                    // 隐藏部署步骤文档
+                    document.getElementById('deployStepsContainer').style.display = 'none';
+                    
+                    // 清空失败测试表格
+                    clearFailedTests();
+                    
+                    console.log('暂无部署信息');
+                }
+            } catch (error) {
+                console.error('加载部署信息失败:', error);
+                // 出错时隐藏状态面板
+                deploymentStatus.style.display = 'none';
+                // 隐藏部署步骤文档
+                document.getElementById('deployStepsContainer').style.display = 'none';
+            }
+        }
+        
+        // 加载失败测试用例
+        async function loadFailedTests(projectId, forceRefresh = false) {
+            try {
+                // 清空表格内容
+                clearFailedTests();
+                
+                console.log('正在加载项目ID为', projectId, '的测试用例...');
+                
+                // 使用fetch直接调用API，强制跳过任何缓存
+                const response = await fetch(`/test/api/${projectId}?t=${new Date().getTime()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                }).then(res => res.json());
+                
+                console.log('原始API响应:', response);
+                
+                if (response.success && response.test_cases && response.test_cases.length > 0) {
+                    console.log('获取到测试用例总数：', response.test_cases.length, '个');
+                    
+                    // 创建测试结果摘要表，展示测试结果分布
+                    const resultSummary = {
+                        total: response.test_cases.length,
+                        failed: 0,
+                        passed: 0,
+                        pending: 0,
+                        other: 0
+                    };
+                    
+                    // 遍历所有测试用例，记录测试结果分布
+                    response.test_cases.forEach(test => {
+                        // 更全面的状态检测逻辑，考虑不同的表示方式
+                        const result = (test.test_result || '').toLowerCase();
+                        
+                        if (result.includes('fail') || result === '失败' || result.includes('错误') || result.includes('error')) {
+                            resultSummary.failed++;
+                        } else if (result.includes('pass') || result === '通过' || result.includes('success')) {
+                            resultSummary.passed++;
+                        } else if (result.includes('pend') || result === '待执行') {
+                            resultSummary.pending++;
+                        } else {
+                            resultSummary.other++;
+                        }
+                    });
+                    
+                    console.log('测试结果摘要:', resultSummary);
+                    
+                    // 增强过滤逻辑，识别各种表示失败的状态
+                    const failedTests = response.test_cases.filter(test => {
+                        // 获取测试结果，统一转为小写进行比较
+                        const result = (test.test_result || '').toLowerCase();
+                        
+                        // 更详细的日志，显示每个测试用例的状态
+                        console.log(`测试用例 ${test.id} [${test.test_name}]:`, 
+                            `当前状态=${test.test_result}`, 
+                            `状态小写=${result}`,
+                            `是否判定为失败=${result.includes('fail') || result === '失败' || result.includes('错误') || result.includes('error')}`);
+                        
+                        // 返回所有失败状态的测试用例
+                        return result.includes('fail') || result === '失败' || 
+                               result.includes('错误') || result.includes('error');
+                    });
+                    
+                    console.log('当前失败的测试用例：', failedTests.length, '个');
+                    
+                    if (failedTests.length > 0) {
+                        // 显示失败测试用例
+                        displayFailedTests(failedTests);
+                    } else {
+                        // 显示无失败测试用例
+                        const emptyRow = document.createElement('tr');
+                        const emptyCell = document.createElement('td');
+                        emptyCell.colSpan = 4;
+                        emptyCell.textContent = '没有失败的测试用例';
+                        emptyRow.appendChild(emptyCell);
+                        failedTestsTableBody.appendChild(emptyRow);
+                    }
+                } else {
+                    // 显示无测试用例
+                    const emptyRow = document.createElement('tr');
+                    const emptyCell = document.createElement('td');
+                    emptyCell.colSpan = 4;
+                    emptyCell.textContent = '暂无测试用例';
+                    emptyRow.appendChild(emptyCell);
+                    failedTestsTableBody.appendChild(emptyRow);
+                }
+            } catch (error) {
+                console.error('加载失败测试用例列表失败:', error);
+                
+                // 显示错误消息
+                clearFailedTests();
+                const errorRow = document.createElement('tr');
+                const errorCell = document.createElement('td');
+                errorCell.colSpan = 4;
+                errorCell.className = 'error-message';
+                errorCell.textContent = '加载失败测试用例失败，请重试';
+                errorRow.appendChild(errorCell);
+                failedTestsTableBody.appendChild(errorRow);
+            }
+        }
+        
+        // 显示失败测试用例
+        function displayFailedTests(failedTests) {
+            // 清空表格内容
+            clearFailedTests();
+            
+            // 添加失败测试用例
+            failedTests.forEach((test, index) => {
+                const row = document.createElement('tr');
+                
+                // 用例编号
+                const idCell = document.createElement('td');
+                idCell.textContent = test.id;
+                row.appendChild(idCell);
+                
+                // 失败用例
+                const nameCell = document.createElement('td');
+                nameCell.textContent = test.name || test.test_name || `测试用例 ${index + 1}`;
+                row.appendChild(nameCell);
+                
+                // 测试结果
+                const resultCell = document.createElement('td');
+                // 使用原始的测试结果字符串，而不是硬编码的"失败"
+                const testResult = test.test_result || '失败';
+                resultCell.textContent = testResult;
+                resultCell.style.color = 'red';
+                row.appendChild(resultCell);
+                
+                // 错误信息 - 尝试从测试内容中提取
+                const errorCell = document.createElement('td');
+                let errorMessage = '无详细错误信息';
+                
+                // 首先检查是否直接有错误信息
+                if (test.error_message) {
+                    errorMessage = test.error_message;
+                } else if (test.message) {
+                    errorMessage = test.message;
+                } else {
+                    // 尝试从test_content解析错误信息
+                    try {
+                        if (test.test_content) {
+                            let contentObj;
+                            if (typeof test.test_content === 'string') {
+                                contentObj = JSON.parse(test.test_content);
+                            } else {
+                                contentObj = test.test_content;
+                            }
+                                
+                            if (contentObj.error_message) {
+                                errorMessage = contentObj.error_message;
+                            } else if (contentObj.message) {
+                                errorMessage = contentObj.message;
+                            } else if (contentObj.error) {
+                                errorMessage = typeof contentObj.error === 'string' ? 
+                                    contentObj.error : JSON.stringify(contentObj.error);
+                            } else if (contentObj.reason) {
+                                errorMessage = contentObj.reason;
+                            }
+                        }
+                    } catch (e) {
+                        console.log('无法从测试内容解析错误信息:', e);
+                        // 如果JSON解析失败，但存在test_content字符串，尝试直接使用它
+                        if (typeof test.test_content === 'string' && test.test_content.length > 0) {
+                            errorMessage = test.test_content.length > 100 ? 
+                                test.test_content.substring(0, 100) + '...' : 
+                                test.test_content;
+                        }
+                    }
+                }
+                
+                errorCell.textContent = errorMessage;
+                row.appendChild(errorCell);
+                
+                failedTestsTableBody.appendChild(row);
+            });
+        }
+        
+        // 清空失败测试用例表格
+        function clearFailedTests() {
+            failedTestsTableBody.innerHTML = '';
+        }
+        
+        // 更新进度条
+        function updateProgress(percentage) {
+            progressFill.style.width = percentage + '%';
+            progressPercentage.textContent = percentage + '%';
+        }
+        
+        // 获取环境名称
+        function getEnvironmentName(env) {
+            const envNames = {
+                'dev': '开发环境',
+                'test': '测试环境',
+                'staging': '预发布环境',
+                'prod': '生产环境'
+            };
+            return envNames[env] || env;
+        }
+        
+        // 获取部署状态文本
+        function getDeploymentStatusText(status) {
+            const statusTexts = {
+                'pending': '等待中',
+                'deploying': '部署中',
+                'testing': '测试中',
+                'success': '部署成功',
+                'failed': '部署失败'
+            };
+            return statusTexts[status] || status;
+        }
+
+        // 加载系统配置
+        async function loadSystemConfigs() {
+            try {
+                console.log('开始加载部署环境配置...');
+                // 加载部署环境选项
+                const response = await API.SystemConfig.getConfigItems('deployment_environment');
+                console.log('加载部署环境配置响应:', response);
+                
+                if (response.success) {
+                    const environmentSelect = document.getElementById('environmentSelect');
+                    environmentSelect.innerHTML = '';
+                    
+                    response.items.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.key;
+                        option.textContent = item.value;
+                        option.selected = item.is_default;
+                        environmentSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('加载系统配置失败:', error);
+                alert('加载部署环境配置失败，请刷新页面重试');
+            }
+        }
+
+        // 确保在页面加载时调用系统配置加载函数
+        loadSystemConfigs();
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取当前项目ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get('id') || getCurrentProjectId();
+            
+            if (projectId) {
+                // 使用现有的loadDeploymentInfo函数替代loadDeploymentData
+                // 强制刷新数据以确保显示最新内容
+                loadDeploymentInfo(projectId, true);
+                // 加载系统配置已在外部调用
+            } else {
+                // 无项目ID时重定向到首页
+                window.location.href = 'index.html';
+            }
+            
+            // 绑定保存按钮事件（如果存在）
+            const saveDeployment = document.getElementById('saveDeployment');
+            if (saveDeployment) {
+                saveDeployment.addEventListener('click', function() {
+                    // 保存部署配置的逻辑
+                    // ...
+                });
+            }
+        });
+        
+        // 设置页面刷新间隔 - 改为每15秒自动刷新一次失败测试用例
+        setInterval(() => {
+            if (currentProjectId) {
+                console.log('自动刷新测试用例...');
+                loadFailedTests(currentProjectId, true);
+            }
+        }, 15000);
+        
+        // 确保在页面加载后立即刷新测试用例状态
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (currentProjectId) {
+                    console.log('页面加载后初次刷新测试用例...');
+                    loadFailedTests(currentProjectId, true);
+                }
+            }, 1000);
+        });
+
+        // 渲染Markdown格式文本
+        function renderMarkdown(text) {
+            if (!text) return '';
+            
+            // 转义HTML
+            let html = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+            
+            // 处理多行代码块
+            html = html.replace(/```([a-z]*)\n([\s\S]*?)\n```/g, function(match, language, code) {
+                // 为不同类型的代码块应用特定样式
+                let codeClass = language || 'plaintext';
+                
+                // 处理配置文件内容
+                if (language === 'properties' || language === 'conf' || language === '' || 
+                    code.includes('spring.datasource') || code.includes('application.properties')) {
+                    codeClass = 'config';
+                }
+                
+                // 保留代码块中的换行，并应用特定样式
+                return `<div class="code-block ${codeClass}"><pre>${code.replace(/\n/g, '<br>')}</pre></div>`;
+            });
+            
+            // 处理缩进代码块（4个空格或一个制表符开头的行）
+            const indentedCodeBlockRegex = /^( {4}|\t)(.+)$/gm;
+            if (indentedCodeBlockRegex.test(html)) {
+                html = html.replace(indentedCodeBlockRegex, '<pre class="indented-code">$2</pre>');
+            }
+            
+            // 处理行内代码
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // 处理标题 (# 标题)
+            html = html.replace(/^(#{1,6})\s+(.+)$/gm, function(match, hashes, content) {
+                const level = hashes.length;
+                return `<h${level}>${content}</h${level}>`;
+            });
+            
+            // 处理无序列表
+            html = html.replace(/^[\s]*[-*]\s+(.+)$/gm, '<li>$1</li>');
+            html = html.replace(/<li>(.+)<\/li>\n<li>/g, '<li>$1</li>\n<li>');
+            html = html.replace(/(<li>[\s\S]+<\/li>)/g, '<ul>$1</ul>');
+            
+            // 处理有序列表
+            html = html.replace(/^[\s]*(\d+)\.\s+(.+)$/gm, '<li>$2</li>');
+            
+            // 处理粗体
+            html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            
+            // 处理斜体
+            html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+            
+            // 处理链接
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+            
+            // 处理换行
+            html = html.replace(/\n/g, '<br>');
+            
+            return html;
+        }
+    });
+    </script>
+</body>
+</html> 
