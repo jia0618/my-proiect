@@ -1,0 +1,818 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* 顶部导航栏样式 */
+.header {
+    background-color: #4285f4;
+    color: white;
+    padding: 0 20px;
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.icons {
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* 主体内容区域 */
+.main-content {
+    display: flex;
+    flex: 1;
+}
+
+/* 侧边栏样式 */
+.sidebar {
+    width: 200px;
+    background-color: #263238;
+    color: #b0bec5;
+    height: calc(100vh - 50px);
+}
+
+.menu {
+    list-style: none;
+}
+
+.menu-item {
+    padding: 15px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+.menu-item i {
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.menu-item:hover {
+    background-color: #37474f;
+    color: white;
+}
+
+.menu-item.active {
+    background-color: #37474f;
+    color: white;
+    border-left: 3px solid #4285f4;
+}
+
+/* 内容区域样式 */
+.content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.breadcrumb {
+    margin-bottom: 20px;
+    color: #757575;
+    font-size: 14px;
+}
+
+.card {
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.header-right {
+    display: flex;
+    gap: 10px;
+}
+
+.select-label {
+    font-size: 14px;
+    color: #555;
+    margin-right: 5px;
+}
+
+.language-select-container,
+.architecture-select-container,
+.module-select-container,
+.test-type-container,
+.environment-container,
+.project-select-container {
+    display: flex;
+    align-items: center;
+    min-width: auto;
+}
+
+.language-select,
+.architecture-select,
+.module-select,
+.test-type-select,
+.environment-select,
+.project-select {
+    width: 120px;
+    padding: 6px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 14px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+}
+
+.language-select:focus,
+.architecture-select:focus,
+.module-select:focus,
+.test-type-select:focus,
+.environment-select:focus,
+.project-select:focus {
+    outline: none;
+    border-color: #4285f4;
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+.card-body {
+    padding: 0;
+}
+
+.card-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* 表格样式 */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 12px 20px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.table th {
+    background-color: #263238;
+    color: white;
+    font-weight: normal;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* 按钮样式 */
+.btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    border: none;
+    transition: all 0.3s;
+}
+
+.btn-edit {
+    background-color: #4285f4;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #3367d6;
+}
+
+.btn-delete {
+    background-color: #ea4335;
+    color: white;
+    margin-left: 8px;
+}
+
+.btn-delete:hover {
+    background-color: #d32f2f;
+}
+
+.btn-add {
+    background-color: #fbbc05;
+    color: white;
+    padding: 8px 16px;
+}
+
+.btn-add:hover {
+    background-color: #f9a825;
+}
+
+/* 页脚样式 */
+.footer {
+    text-align: center;
+    color: #9e9e9e;
+    font-size: 12px;
+    margin-top: 20px;
+}
+
+/* 需求描述页面样式 */
+.requirement-body {
+    padding: 15px 20px;
+}
+
+.textarea-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+}
+
+.requirement-textarea {
+    width: 100%;
+    height: 100%;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    resize: none;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.requirement-textarea:focus {
+    outline: none;
+    border-color: #4285f4;
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+.editor-tools {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    padding: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 10px;
+}
+
+.editor-tools i {
+    cursor: pointer;
+    color: #757575;
+    padding: 5px;
+    font-size: 16px;
+}
+
+.editor-tools i:hover {
+    color: #4285f4;
+}
+
+/* 下载按钮样式 */
+.download-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-download {
+    background-color: #fbbc05;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-download:hover {
+    background-color: #f9a825;
+}
+
+.btn-download i {
+    font-size: 16px;
+}
+
+.btn-execute {
+    background-color: #34a853;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-execute:hover {
+    background-color: #2d8d47;
+}
+
+.btn-execute i {
+    font-size: 16px;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-save {
+    background-color: #4285f4;
+    color: white;
+}
+
+.btn-save:hover {
+    background-color: #3367d6;
+}
+
+.btn-cancel {
+    background-color: #9e9e9e;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background-color: #757575;
+}
+
+.btn-confirm {
+    background-color: #fbbc05;
+    color: white;
+}
+
+.btn-confirm:hover {
+    background-color: #f9a825;
+}
+
+/* 架构代码页面样式 */
+.architecture-body {
+    padding: 15px 20px;
+}
+
+/* 代码容器样式 */
+.code-container {
+    width: 100%;
+    height: 550px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: #fff;
+    position: relative;
+}
+
+/* 架构代码文本框 */
+.architecture-textarea {
+    width: 100%;
+    height: 100%;
+    padding: 15px;
+    border: none;
+    resize: none;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+    font-family: 'Consolas', 'Courier New', monospace;
+    background-color: #fff;
+}
+
+.architecture-textarea:focus {
+    outline: none;
+}
+
+/* 下载按钮样式 */
+.download-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-download {
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    margin-top: 10px;
+}
+
+.btn-download:hover {
+    background-color: #3367d6;
+}
+
+.btn-download i {
+    font-size: 16px;
+}
+
+.card-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* 通用样式 */
+.textarea-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+}
+
+.requirement-textarea,
+.architecture-textarea {
+    width: 100%;
+    height: 100%;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    resize: none;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.requirement-textarea:focus,
+.architecture-textarea:focus {
+    outline: none;
+    border-color: #4285f4;
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+.architecture-textarea {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* 调整需求描述页面的样式以匹配架构代码页面 */
+.requirement-body {
+    padding: 15px 20px;
+}
+
+/* 数据库设计页面样式 */
+.database-type-container,
+.project-select-container {
+    display: flex;
+    align-items: center;
+    min-width: auto;
+}
+
+.database-type-select,
+.project-select {
+    width: 120px;
+    padding: 6px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 14px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+}
+
+.database-type-select:focus,
+.project-select:focus {
+    outline: none;
+    border-color: #4285f4;
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+.generate-btn {
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.generate-btn:hover {
+    background-color: #3367d6;
+}
+
+.generate-btn i {
+    font-size: 16px;
+}
+
+.btn-download {
+    background-color: #fbbc05;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-download:hover {
+    background-color: #f9a825;
+}
+
+.btn-download i {
+    font-size: 16px;
+}
+
+/* 调整表格列宽 */
+.table th:nth-child(1), /* 表名 */
+.table td:nth-child(1) {
+    width: 15%;
+}
+
+.table th:nth-child(2), /* 字段名 */
+.table td:nth-child(2) {
+    width: 15%;
+}
+
+.table th:nth-child(3), /* 数据类型 */
+.table td:nth-child(3) {
+    width: 12%;
+}
+
+.table th:nth-child(4), /* 长度 */
+.table td:nth-child(4) {
+    width: 8%;
+}
+
+.table th:nth-child(5), /* 约束 */
+.table td:nth-child(5) {
+    width: 12%;
+}
+
+.table th:nth-child(6), /* 描述 */
+.table td:nth-child(6) {
+    width: 20%;
+}
+
+.table th:nth-child(7), /* 操作 */
+.table td:nth-child(7) {
+    width: 18%;
+}
+
+/* 按钮样式 */
+.btn-primary {
+    background-color: #4285f4;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #3367d6;
+}
+
+.btn-logs {
+    background-color: #607d8b;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-logs:hover {
+    background-color: #455a64;
+}
+
+.btn-logs i {
+    font-size: 16px;
+}
+
+.deploy-btn {
+    background-color: #4285f4;
+    color: white;
+}
+
+.deploy-btn:hover {
+    background-color: #3367d6;
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.btn-deploy {
+    background-color: #4285f4;
+    color: white;
+}
+
+.btn-deploy:hover {
+    background-color: #3367d6;
+}
+
+.btn-rollback {
+    background-color: #ea4335;
+    color: white;
+}
+
+.btn-rollback:hover {
+    background-color: #d32f2f;
+}
+
+/* 测试按钮样式 */
+.btn-test {
+    background-color: #4285f4;
+    color: white;
+}
+
+.btn-test:hover {
+    background-color: #3367d6;
+}
+
+/* 部署状态样式 */
+.deployment-status {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    margin-top: 10px;
+}
+
+.status-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-label {
+    font-weight: bold;
+    color: #555;
+}
+
+.status-value {
+    font-weight: bold;
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+.progress-bar {
+    flex-grow: 1;
+    height: 10px;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #4285f4;
+    border-radius: 5px;
+    transition: width 0.3s ease-in-out;
+}
+
+.progress-percentage {
+    min-width: 45px;
+    font-weight: bold;
+    color: #4285f4;
+}
+
+/* 部署操作区域样式 */
+.deployment-actions {
+    padding: 15px 20px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.deployment-btn-container {
+    margin-bottom: 10px;
+}
+
+.deployment-btn-container .btn {
+    width: 200px;
+}
+
+/* 新建项目表单样式 */
+.project-form {
+    padding: 15px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4285f4;
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+#project-description {
+    resize: vertical;
+    min-height: 150px;
+}
+
+#submit-project {
+    float: right;
+    background-color: #fbbc05;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#submit-project:hover {
+    background-color: #f9a825;
+}
+
+/* 图标样式 */
+.icons i {
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.icons .bi-box-arrow-right {
+    color: #fff;
+    font-size: 20px;
+}
+
+.icons .bi-box-arrow-right:hover {
+    color: #f0f0f0;
+    transform: scale(1.1);
+} 

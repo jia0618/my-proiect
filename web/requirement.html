@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>软件管理平台 - 需求描述</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="api.js"></script>
+    <script src="common.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="logo">软件管理平台</div>
+            <div class="icons">
+                <i class="bi bi-box-arrow-right" id="logout"></i>
+            </div>
+        </header>
+        
+        <!-- 主体内容 -->
+        <div class="main-content">
+            <!-- 侧边栏 -->
+            <div class="sidebar">
+                <ul class="menu">
+                    <li class="menu-item" data-page="index.html"><i class="bi bi-house"></i> 首页</li>
+                    <li class="menu-item active" data-page="requirement.html"><i class="bi bi-box"></i> 需求描述</li>
+                    <li class="menu-item" data-page="architecture.html"><i class="bi bi-people"></i> 架构代码</li>
+                    <li class="menu-item" data-page="database.html"><i class="bi bi-cart"></i> 数据库设计</li>
+                    <li class="menu-item" data-page="module.html"><i class="bi bi-clipboard-data"></i> 模块代码</li>
+                    <li class="menu-item" data-page="testcase.html"><i class="bi bi-gear"></i> 测试用例</li>
+                    <li class="menu-item" data-page="deployment.html"><i class="bi bi-cloud-upload"></i> 功能部署</li>
+                </ul>
+            </div>
+            
+            <!-- 主要内容区域 -->
+            <div class="content">
+                <div class="breadcrumb">需求描述</div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="header-left">
+                            <span>需求描述</span>
+                            <div class="project-select-container">
+                                <select id="projectSelect" class="project-select">
+                                    <option value="" disabled selected>请选择项目</option>
+                                    <!-- 项目选项将通过API动态加载 -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="header-right action-buttons">
+                            <button class="btn btn-cancel" id="cancelBtn">取消</button>
+                            <button class="btn btn-save" id="saveBtn">保存</button>
+                            <button class="btn btn-confirm" id="submitBtn">提交</button>
+                        </div>
+                    </div>
+                    <div class="card-body requirement-body">
+                        <div class="textarea-container">
+                            <textarea id="requirementContent" placeholder="请选择项目并输入需求描述" class="requirement-textarea"></textarea>
+                            <div class="editor-tools">
+                                <i class="bi bi-pencil"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <!-- 按钮已移到header -->
+                    </div>
+                </div>
+                <div class="footer">
+                    <p>© 2025 软件管理平台 | Powered by 软件管理系统 | 版权所有</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取页面元素
+        const projectSelect = document.getElementById('projectSelect');
+        const requirementContent = document.getElementById('requirementContent');
+        const saveBtn = document.getElementById('saveBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // 当前需求ID，用于保存/更新操作
+        let currentRequirementId = null;
+        
+        // 加载项目列表
+        loadProjects();
+        
+        // 从URL获取项目ID参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectIdFromUrl = urlParams.get('project_id');
+        if (projectIdFromUrl) {
+            // 如果URL中有项目ID，则自动选中该项目
+            localStorage.setItem('currentProjectId', projectIdFromUrl);
+        }
+        
+        // 监听项目选择变更
+        projectSelect.addEventListener('change', function() {
+            const selectedProjectId = this.value;
+            if (selectedProjectId) {
+                // 保存选择的项目ID
+                localStorage.setItem('currentProjectId', selectedProjectId);
+                // 加载项目需求
+                loadProjectRequirement(selectedProjectId);
+            } else {
+                // 清空需求内容
+                requirementContent.value = '';
+                requirementContent.disabled = true;
+                currentRequirementId = null;
+            }
+        });
+        
+        // 保存按钮点击事件
+        saveBtn.addEventListener('click', async function() {
+            if (!projectSelect.value) {
+                alert('请先选择项目');
+                return;
+            }
+            
+            const content = requirementContent.value.trim();
+            if (content === '') {
+                alert('请输入需求描述内容');
+                return;
+            }
+            
+            try {
+                let response;
+                const projectId = projectSelect.value;
+                const data = {
+                    content: content,
+                    requirement_type: 'functional', // 默认为功能需求
+                    priority: 'medium' // 默认优先级
+                };
+                
+                if (currentRequirementId) {
+                    // 更新现有需求
+                    response = await API.Requirement.updateRequirement(currentRequirementId, data);
+                } else {
+                    // 创建新需求
+                    response = await API.Requirement.createRequirement(projectId, content, data.requirement_type, data.priority);
+                }
+                
+                if (response.success) {
+                    alert('需求保存成功');
+                    // 更新当前需求ID
+                    if (response.requirement && response.requirement.id) {
+                        currentRequirementId = response.requirement.id;
+                    }
+                } else {
+                    alert('保存失败：' + response.message);
+                }
+            } catch (error) {
+                console.error('保存需求失败:', error);
+                alert('保存需求失败，请重试');
+            }
+        });
+        
+        // 取消按钮点击事件
+        cancelBtn.addEventListener('click', function() {
+            if (!projectSelect.value) {
+                return;
+            }
+            
+            if (requirementContent.value.trim() !== '' && confirm('确定要取消编辑吗？未保存的内容将丢失')) {
+                // 重新加载需求内容
+                loadProjectRequirement(projectSelect.value);
+            }
+        });
+        
+        // 提交按钮点击事件
+        submitBtn.addEventListener('click', async function() {
+            if (!projectSelect.value) {
+                alert('请先选择项目');
+                return;
+            }
+            
+            const content = requirementContent.value.trim();
+            if (content === '') {
+                alert('请输入需求描述内容');
+                return;
+            }
+            
+            try {
+                // 先保存需求
+                let response;
+                const projectId = projectSelect.value;
+                const data = {
+                    content: content,
+                    requirement_type: 'functional',
+                    priority: 'high' // 提交时默认为高优先级
+                };
+                
+                if (currentRequirementId) {
+                    // 更新现有需求
+                    response = await API.Requirement.updateRequirement(currentRequirementId, data);
+                } else {
+                    // 创建新需求
+                    response = await API.Requirement.createRequirement(projectId, content, data.requirement_type, data.priority);
+                }
+                
+                if (response.success) {
+                    alert('需求提交成功');
+                    // 重定向到首页或其他页面
+                    window.location.href = 'index.html';
+                } else {
+                    alert('提交失败：' + response.message);
+                }
+            } catch (error) {
+                console.error('提交需求失败:', error);
+                alert('提交需求失败，请重试');
+            }
+        });
+        
+        // 加载用户项目列表
+        async function loadProjects() {
+            try {
+                const response = await API.Project.listProjects();
+                
+                // 清空现有选项，只保留默认选项
+                while (projectSelect.options.length > 1) {
+                    projectSelect.remove(1);
+                }
+                
+                if (response.success && response.projects && response.projects.length > 0) {
+                    // 添加项目选项
+                    response.projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.id;
+                        option.textContent = project.name;
+                        projectSelect.appendChild(option);
+                    });
+                    
+                    // 检查是否有来自URL或本地存储的项目ID
+                    const savedProjectId = projectIdFromUrl || localStorage.getItem('currentProjectId');
+                    if (savedProjectId) {
+                        // 设置选择的项目
+                        projectSelect.value = savedProjectId;
+                        
+                        // 如果选择有效，则加载项目需求
+                        if (projectSelect.value) {
+                            loadProjectRequirement(savedProjectId);
+                        }
+                    }
+                } else {
+                    alert('暂无项目，请先创建项目');
+                }
+            } catch (error) {
+                console.error('加载项目列表失败:', error);
+                alert('加载项目列表失败，请刷新页面重试');
+            }
+        }
+        
+        // 加载项目需求
+        async function loadProjectRequirement(projectId) {
+            try {
+                // 启用文本域
+                requirementContent.disabled = false;
+                
+                // 显示加载中提示
+                requirementContent.value = '正在加载需求数据...';
+                
+                const response = await API.Requirement.listRequirements(projectId);
+                
+                if (response.success && response.requirements && response.requirements.length > 0) {
+                    // 获取最新的需求（假设按ID或创建时间排序）
+                    const latestRequirement = response.requirements[response.requirements.length - 1];
+                    requirementContent.value = latestRequirement.content;
+                    currentRequirementId = latestRequirement.id;
+                } else {
+                    // 没有需求，清空文本域
+                    requirementContent.value = '';
+                    currentRequirementId = null;
+                }
+            } catch (error) {
+                console.error('加载需求失败:', error);
+                requirementContent.value = '加载需求失败，请重试';
+            }
+        }
+    });
+    </script>
+</body>
+</html> 
