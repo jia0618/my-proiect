@@ -18,13 +18,13 @@ class AIService:
         
         Args:
             deepseek_api_key: DeepSeek API密钥，默认从配置获取
-            tongyi_api_key: 通义前问API密钥，默认从配置获取
+            tongyi_api_key: 通义千问API密钥，默认从配置获取
         """
         if not deepseek_api_key or not tongyi_api_key:
             config = get_api_config()
             deepseek_api_key = deepseek_api_key or config.get("deepseek_api_key")
             tongyi_api_key = tongyi_api_key or config.get("tongyi_api_key")
-        
+        #创建两个客户端实例
         self.deepseek_client = DeepSeekClient(api_key=deepseek_api_key)
         self.tongyi_client = TongyiClient(api_key=tongyi_api_key, use_openai_client=False)
     
@@ -82,6 +82,7 @@ class AIService:
         Returns:
             Dict[str, Any]: 测试用例生成结果
         """
+        #prompt = f"""是一个 f-string（格式化字符串）用于创建一个字符串变量 prompt
         prompt = f"""
 请根据以下需求生成完整的测试用例，包括单元测试和集成测试。测试代码应完整、可执行。
 
@@ -89,6 +90,7 @@ class AIService:
 {requirement}
 
 """
+        # prompt += ... 是 Python 中的 字符串拼接操作，用于在原有提示词的基础上 追加额外内容
         if code_section:
             prompt += f"""
 相关代码:
@@ -96,7 +98,7 @@ class AIService:
 {code_section}
 ```
 """
-        
+
         prompt += """
 请生成测试用例，确保覆盖主要功能和边缘情况。使用pytest框架组织测试代码。
 """

@@ -36,7 +36,7 @@ def get_openai_client_config() -> Dict[str, Any]:
 def get_available_models() -> Dict[str, str]:
     """获取可用的模型列表"""
     return {
-        "deepseek": "deepseek-chat",
+        "deepseek": "deepseek-chat",#提供模型标识符
         "tongyi": "qwen-max",
         "tongyi_openai": "qwen-max-latest"  # 使用OpenAI兼容接口的模型
     }

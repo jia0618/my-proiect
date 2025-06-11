@@ -107,16 +107,18 @@ class PromptManager:
         template = self.templates[template_name]["template"]
         
         # 替换模板中的变量
+        #. 同时遍历键和值
         for key, value in params.items():
+            #构造占位符
             placeholder = "{{" + key + "}}"
             # 如果值是字典或列表，转换为格式化的JSON字符串
             if isinstance(value, (dict, list)):
                 value_str = json.dumps(value, ensure_ascii=False, indent=2)
             else:
                 value_str = str(value)
-            
+            #替换占位符
             template = template.replace(placeholder, value_str)
-        
+        #去除字符串首尾的空白字符，使最终返回的提示词更简洁、规范
         return template.strip()
     
     def generate_cursor_prompt(self, requirement: str, outline: Optional[Dict[str, Any]] = None) -> str:

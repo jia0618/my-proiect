@@ -22,7 +22,7 @@ class AIModelPlatform:
         
         Args:
             deepseek_api_key: DeepSeek API密钥
-            tongyi_api_key: 通义前问API密钥
+            tongyi_api_key: 通义千问API密钥
             db_host: 数据库主机
             db_user: 数据库用户
             db_password: 数据库密码
